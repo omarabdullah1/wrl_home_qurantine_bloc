@@ -30,3 +30,5 @@ class LoginErrorState extends TestStates {
 }
 
 class UpdateSuccessState extends TestStates {}
+
+class GetRemainingDaysState extends TestStates {}

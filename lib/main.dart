@@ -14,8 +14,8 @@ import 'package:wrl_home_qurantine_bloc/shared/network/local/cache_helper.dart';
 import 'package:wrl_home_qurantine_bloc/shared/network/remote/dio_helper.dart';
 import 'package:wrl_home_qurantine_bloc/shared/styles/colors.dart';
 
-import 'layout/wrl_app/login/cubit/cubit.dart';
-import 'layout/wrl_app/login/cubit/states.dart';
+import 'layout/wrl_app/login/cubit/login_cubit.dart';
+import 'layout/wrl_app/login/cubit/login_states.dart';
 import 'layout/wrl_app/login/wrl_login_screen.dart';
 
 void main() async {
@@ -26,6 +26,7 @@ void main() async {
   await CacheHelper.init();
 
   bool isDark = CacheHelper.getData(key: 'isDark');
+  bool isDone = CacheHelper.getData(key: 'DoneScanning');
 
   Widget widget;
 
@@ -33,7 +34,11 @@ void main() async {
   print(token);
 
   if (token != null) {
-    widget = const TestLayout();
+    if (isDone != null) {
+      widget = const TestLayout();
+    } else {
+      widget = const ScanningLayout();
+    }
   } else {
     widget = const HomeQuarantineLoginScreen();
   }

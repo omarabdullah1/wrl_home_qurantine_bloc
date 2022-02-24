@@ -52,15 +52,15 @@ class _ScanningLayoutState extends State<ScanningLayout> {
       create: (context) => ScanningCubit(),
       child: BlocConsumer<ScanningCubit, ScanningStates>(
         listener: (context, state) {
-          if(state is ScanningDoneState){
-             navigateAndFinish(context, const TestLayout());
+          if (state is ScanningDoneState) {
+            navigateAndFinish(context, const TestLayout());
           }
         },
         builder: (context, state) {
           double width = MediaQuery.of(context).size.width;
           double height = MediaQuery.of(context).size.height;
           var scanningCubit = ScanningCubit.get(context);
-          
+
           return Scaffold(
             backgroundColor: const Color.fromRGBO(247, 248, 250, 1),
             appBar: AppBar(
@@ -147,44 +147,35 @@ class _ScanningLayoutState extends State<ScanningLayout> {
                       const SizedBox(
                         height: 10.0,
                       ),
-                       SizedBox(
-                          height: 40,
-                          width: width - 100,
-                          child: ElevatedButton(
-                            onPressed: 
-                            scanningCubit.capturesCount >= 3
-                                ? () {
-                                    scanningCubit.checkAvailablity();
-                                    if (!scanningCubit.minAccessFounded) {
-                                      scanningCubit.doneFunc(context);
-                                    } else {
-                                      showToast(
-                                          text: 'Please Scan more rooms',
-                                          state: ToastStates.ERROR);
-                                    }
+                      SizedBox(
+                        height: 40,
+                        width: width - 100,
+                        child: ElevatedButton(
+                          onPressed: scanningCubit.capturesCount >= 5
+                              ? () {
+                                  scanningCubit.checkAvailablity();
+                                  if (!scanningCubit.minAccessFounded) {
+                                    scanningCubit.doneFunc(context);
+                                  } else {
+                                    showToast(
+                                        text: 'Please Scan more rooms',
+                                        state: ToastStates.ERROR);
                                   }
-                                : null,
-                            child:  const Text(
-                                // controller.capturesCount < 3
-                                //     ? '${controller.capturesCountc}'
-                                //     : 
-                                    'DONE',
-                                style: TextStyle(
-                                  color: 
-                                  // controller.capturesCount < 3
-                                  //     ? Colors.black
-                                  //     : 
-                                      Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14.0,
-                                ),
-                              ),
-                            
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.indigo[900],
+                                }
+                              : null,
+                          child: const Text(
+                            'DONE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.0,
                             ),
                           ),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.indigo[900],
+                          ),
                         ),
+                      ),
                       // ElevatedButton(onPressed: () {
                       //   controller.checkRepeated();
                       // }, child: const Text('R')),
@@ -202,7 +193,7 @@ class _ScanningLayoutState extends State<ScanningLayout> {
                               child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children:  [
+                            children: [
                               const Text(
                                 'Scanned Rooms',
                                 style: TextStyle(
@@ -213,12 +204,12 @@ class _ScanningLayoutState extends State<ScanningLayout> {
                               const SizedBox(
                                 height: 25.0,
                               ),
-                               Text(
-                                    '${scanningCubit.capturesCount}',
-                                    style: const TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                              Text(
+                                '${scanningCubit.capturesCount}',
+                                style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ],
                           )),
                           const VerticalDivider(

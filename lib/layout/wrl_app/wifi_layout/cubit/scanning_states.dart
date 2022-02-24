@@ -8,3 +8,11 @@ class ScanningInitial extends ScanningStates {}
 class ScanningCountChangeState extends ScanningStates {}
 
 class ScanningDoneState extends ScanningStates {}
+
+class LoginSuccessState extends ScanningStates {}
+
+class LoginErrorState extends ScanningStates {
+  final String error;
+
+  LoginErrorState(this.error);
+}

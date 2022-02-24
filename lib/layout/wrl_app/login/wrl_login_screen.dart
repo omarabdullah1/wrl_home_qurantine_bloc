@@ -8,8 +8,8 @@ import 'package:wrl_home_qurantine_bloc/shared/components/components.dart';
 import 'package:wrl_home_qurantine_bloc/shared/components/constants.dart';
 import 'package:wrl_home_qurantine_bloc/shared/network/local/cache_helper.dart';
 
-import 'cubit/cubit.dart';
-import 'cubit/states.dart';
+import 'cubit/login_cubit.dart';
+import 'cubit/login_states.dart';
 
 class HomeQuarantineLoginScreen extends StatefulWidget {
   const HomeQuarantineLoginScreen({Key key}) : super(key: key);

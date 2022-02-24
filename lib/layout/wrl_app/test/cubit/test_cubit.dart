@@ -30,7 +30,9 @@ class TestCubit extends Cubit<TestStates> {
   ////////////////////////////////////////////////////////////////////////////////
   //some view variables
   var isInside = false;
-  var mIsPaired = false;
+  var isPaired = false;
+  var remainingDays = 0;
+  final String btAddress = '75:53:D4:B0:2B:2D';
   UserModel loginModel;
   // bool isOutside = false;
   double myCorrel = 0.0;
@@ -183,11 +185,12 @@ class TestCubit extends Cubit<TestStates> {
         openBlue(true);
       }
       _headsetDetector.getCurrentState.then((value) => _headsetState = value);
-      if (_mapStateToText(_headsetState[HeadsetType.WIRELESS]) ==
-          'Disconnected') {
-        mIsPaired = false;
+      if (_mapStateToText(_headsetState[HeadsetType.WIRELESS]) == 'Connected') {
+        isPaired = true;
+        // print(' is inside true');
       } else {
-        mIsPaired = true;
+        isPaired = false;
+        // print(' is inside false');
       }
       // print(+
       //     'this is headset state');
@@ -392,13 +395,13 @@ class TestCubit extends Cubit<TestStates> {
     // print('My comon levels : ' + comonLevels.toString());
     // print('My comon average : ' + comonAverage.toString());
 
-    if (comonLevels.isNotEmpty && comonLevels.length > 4) {
+    if (comonLevels.isNotEmpty && comonLevels.length > 3) {
       final st = Stats.fromData(comonLevels);
       List<double> statsList = [];
       capMean = comonLevels.average;
       capMedian = st.median;
       capSTD = STD(comonLevels);
-      capVar = pow(capSTD, 2).abs();
+      capVar = pow(capSTD, 2);
       capKurt = kurtosis(comonLevels);
       capSkew = skewness(comonLevels);
       print(' st ccccccccccccccccccccccccccccccccc${st.count}');
@@ -432,7 +435,7 @@ class TestCubit extends Cubit<TestStates> {
       for (var element in decodedSigStats.values) {
         decoded.add(element);
       }
-      var fact = statsList.length / decoded.length;
+      var fact = comonAverage.length / averageLevels.length;
       // print(capStates.toJson());
       print('states List   $statsList');
       // print(sigStates.toJson());
@@ -441,19 +444,9 @@ class TestCubit extends Cubit<TestStates> {
 
       showToast(text: myCorrel.toString(), state: ToastStates.SUCCESS);
       // print(div());
-      myCorrel >= 1.0 ? isInside = true : isInside = false;
-      if (myCorrel >= 1.0) {
-        // isOutside = false;
-        // emit(TestIsInsideChangeState());
-
-        print(true);
-      } else {
-        // isOutside = false;
-        print(false);
-      }
-      // emit(TestIsInsideChangeState());
+      myCorrel >= 0.7 ? isInside = true : isInside = false;
     } else {
-      showToast(text: '000000', state: ToastStates.ERROR);
+      showToast(text: 'Outside', state: ToastStates.ERROR);
       isInside = false;
       // emit(TestIsInsideChangeState());
     }
@@ -482,35 +475,43 @@ class TestCubit extends Cubit<TestStates> {
     print('decoded sig states  ' + decodedSigStats.toString());
   }
 
+  getRemainingDays() {
+    userLogin();
+    emit(GetRemainingDaysState());
+    // return remainingDays;
+  }
+
 //Function to get std
-  // ignore: non_constant_identifier_names
   double STD(List<double> arr) {
     double sum1 = 0;
     double std = 0;
-    for (int i = 0; i < arr.length; i++) {
-      sum1 += pow((arr[i] - arr.average).abs(), 2);
+    final st = Stats.fromData(arr);
+    for (int i = 0; i < st.count; i++) {
+      sum1 += pow((arr[i] - st.average).abs(), 2);
     }
-    std = sqrt((sum1 / (arr.length - 1)));
+    std = sqrt((sum1 / (st.count - 1)));
     return std;
   }
 
 // Function to calculate skewness.
   double skewness(List<double> arr) {
     // Find skewness using above formula
-    double sum = 0.0;
-    double sum1 = 0.0;
-    double sum2 = 0.0;
-    double std = 0.0;
-    double fact = 0.0;
+    final st = Stats.fromData(arr);
+    double sum = 0;
+    double sum1 = 0;
+    double sum2 = 0;
+    double std = 0;
+    double fact = 0;
 
-    fact = (arr.length / ((arr.length - 1) * (arr.length - 2)));
-    for (var element in arr) {
-      sum1 += pow((element - arr.average), 2);
+    fact = (st.count / ((st.count - 1) * (st.count - 2)));
+
+    for (int i = 0; i < st.count; i++) {
+      sum1 += pow((arr[i] - st.average).abs(), 2);
     }
-    std = sqrt((sum1 / (arr.length - 1)));
+    std = sqrt((sum1 / (st.count - 1)));
 
-    for (var element in arr) {
-      sum += pow((element - arr.average).abs(), 3);
+    for (int i = 0; i < arr.length; i++) {
+      sum += pow((arr[i] - st.average).abs(), 3);
     }
     sum2 = pow(std, 3);
 
@@ -520,25 +521,26 @@ class TestCubit extends Cubit<TestStates> {
 // Function to calculate kurtosis.
   double kurtosis(List<double> arr) {
     // Find skewness using above formula
-    double sum = 0.0;
-    double sum2 = 0.0;
-    double fact = 0.0;
-    double fact2 = 0.0;
-    double sum3 = 0.0;
-    double std = 0.0;
+    final st = Stats.fromData(arr);
+    double sum = 0;
+    double sum2 = 0;
+    double fact = 0;
+    double fact2 = 0;
+    double sum3 = 0;
+    double std = 0;
 
-    for (var element in arr) {
-      sum3 += pow((element - arr.average), 2);
+    for (int i = 0; i < st.count; i++) {
+      sum3 += pow((arr[i] - st.average).abs(), 2);
     }
-    std = sqrt((sum3 / (arr.average - 1)));
+    std = sqrt((sum3 / (st.count - 1)));
 
-    fact = ((arr.length * (arr.length + 1)) /
-        ((arr.length - 1) * (arr.length - 2) * (arr.length - 3)));
-    fact2 = ((3 * pow((arr.length - 1).abs(), 2)) /
-        ((arr.length - 2) * (arr.length - 3)));
+    fact = ((st.count * (st.count + 1)) /
+        ((st.count - 1) * (st.count - 2) * (st.count - 3)));
+    fact2 = ((3 * pow((st.count - 1).abs(), 2)) /
+        ((st.count - 2) * (st.count - 3)));
 
-    for (var element in arr) {
-      sum += pow((element - arr.average).abs(), 4);
+    for (int i = 0; i < st.count; i++) {
+      sum += pow((arr[i] - st.average).abs(), 4);
     }
     sum2 = sum / pow((std).abs(), 4);
 
@@ -546,14 +548,13 @@ class TestCubit extends Cubit<TestStates> {
   }
 
   //Function to calculate covariance
-  // ignore: non_constant_identifier_names
   double Covar(List<double> arr1, List<double> arr2) {
     final st1 = Stats.fromData(arr1);
     final st2 = Stats.fromData(arr2);
     List xListSubAvg = [];
     List yListSubAvg = [];
     List mulList = [];
-    double mulListSum = 0.0;
+    double mulListSum = 0;
 
     for (var element in arr1) {
       xListSubAvg.add(element - st1.average);
@@ -569,7 +570,6 @@ class TestCubit extends Cubit<TestStates> {
   }
 
   //Function to calculate correlation
-  // ignore: non_constant_identifier_names
   double Correl(List<double> arr1, List<double> arr2) {
     double mCov = Covar(arr1, arr2);
     double stdA = STD(arr1);
@@ -699,6 +699,8 @@ class TestCubit extends Cubit<TestStates> {
       },
     ).then((value) {
       print(value.data);
+      print('is inside $isInside');
+      print('is paired $isPaired');
     }).catchError((error) {});
   }
 
@@ -714,6 +716,13 @@ class TestCubit extends Cubit<TestStates> {
     ).then((value) {
       // print(value.data);
       loginModel = UserModel.fromJson(value.data);
+      remainingDays = loginModel.data.remainingDays;
+      device = BluetoothDevice(
+        address: loginModel.data.braceletID, //'98:D3:61:FD:7D:22'
+        name: '',
+        isConnected: true,
+      );
+      // print(device.address + 'is device addresss');
       emit(LoginSuccessState());
     }).catchError((error) {
       print(error.toString());

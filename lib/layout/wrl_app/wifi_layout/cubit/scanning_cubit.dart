@@ -27,8 +27,8 @@ class ScanningCubit extends Cubit<ScanningStates> {
   var capturesCount = 0;
   // var capturesCountc = -3;
   var isInside = false;
-  UserModel myModel;
-
+  UserModel loginModel;
+  var scansCount = 0;
   //////////////////////////////////////////////////////////////////////////////
 //wifi objects and variables
   List<WifiNetwork> wifiNetwork = [];
@@ -359,31 +359,31 @@ class ScanningCubit extends Cubit<ScanningStates> {
     return mCov / (stdA * stdB);
   }
 
-  Future<dynamic> doUpdate(context) async {
-    DioHelper.putData(
-            url: UpdateViolationStatus,
-            data: {
-              'user_id': 1,
-              'isInside': true,
-              'isPaired': false,
-            },
-            token: myModel.data.token)
-        .then((value) {
-      if (value != null) {
-        print(value.data);
-      }
-      // print();
-    }).catchError(
-      (error) {
-        print(error.toString());
+  void userLogin() {
+    String user = CacheHelper.getData(key: 'username');
+    String pass = CacheHelper.getData(key: 'password');
+    DioHelper.postData(
+      url: LOGIN,
+      data: {
+        'username': user,
+        'password': pass,
       },
-    );
+    ).then((value) {
+      // print(value.data);
+      loginModel = UserModel.fromJson(value.data);
+      scansCount = loginModel.data.remainingDays;
+      emit(LoginSuccessState());
+    }).catchError((error) {
+      print(error.toString());
+      emit(LoginErrorState(error.toString()));
+    });
   }
 
 /////////////////////////////////////////////////////////////////////////////
   doneFunc(context) {
     getUnique();
     saveData();
+    CacheHelper.saveData(key: 'DoneScanning', value: true);
     emit(ScanningDoneState());
   }
 }
